@@ -3,13 +3,12 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 var natural = require('natural');
-const qs = require('querystring');
 
 class Client {
-	constructor() {
-		this.endpoint = 'https://wiki.teamfortress.com';
-	}
-
+    constructor() {
+        this.endpoint = 'https://wiki.teamfortress.com';
+    }
+    
     async search(options){
         if(!options){
             throw new Error("Expected search options")
@@ -17,15 +16,15 @@ class Client {
         if(options.type){
             switch (options.type){
                 case "weapon" : return await this.searchWeapon(options)
-
+                
                 default:
-                    throw new Error("A valid type of search must be provided")
+                throw new Error("A valid type of search must be provided")
             }
         } else {
             throw new Error("A valid type of search must be provided")
         }
     }
-
+    
     async searchWeapon(options){
         if(!options){
             throw new Error("Expected search options")
@@ -41,10 +40,10 @@ class Client {
                 weaponsUrl += "/" + options.lang
             }
         }
-        const response = await axios.request(weaponsUrl);
-        const result = response.data
+        var response = await axios.request(weaponsUrl);
+        var result = response.data
         
-        const $ = cheerio.load(result);
+        var $ = cheerio.load(result);
         
         const weapons = [];
         
@@ -65,7 +64,42 @@ class Client {
             return undefined;
         }
         const weaponUrl = this.endpoint + fuzzyResults[0].url
-        return weaponUrl
+        const weaponResponse = await axios.request(weaponUrl);
+        const weaponResult = weaponResponse.data
+        $ = cheerio.load(weaponResult)
+        const weaponInformation = {
+            
+            name:fuzzyResults[0].weaponName,
+            short_description:"",
+            description:"",
+            damage:{},
+            item_set:{},
+            demonstration:"",
+            achievements:{},
+            crafting:{},
+            strange_variant:{},
+            update_history:{},
+            bugs:{},
+            trivia:{},
+            extra_attributes:{}
+
+        }
+        
+        //$('li[class^="toclevel"]').each((index, element) => {
+            //const content = $(element).text();
+            //if(content.includes(""))
+            //weaponInformation[content] = content;
+        //});
+        const pContent = [];
+        $('#content p').each((index, element) => {
+            const content = $(element).text();
+            pContent.push(content);
+        });
+        pContent.shift()
+        weaponInformation.short_description = pContent[0]
+        weaponInformation.description = pContent[1]
+        return weaponInformation
+
     }
 }
 
