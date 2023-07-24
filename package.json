@@ -1,0 +1,24 @@
+{
+  "name": "tf2-wiki",
+  "version": "0.0.1",
+  "description": "An usefull package to get information from the official Team Fortress 2 wiki https://wiki.teamfortress.com",
+  "main": "index.js",
+  "repository": "https://github.com/Mendo6472/tf2-wiki",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "team",
+    "fortress",
+    "2",
+    "tf2",
+    "wiki"
+  ],
+  "author": "Mendo6472",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12",
+    "natural": "^6.5.0"
+  }
+}
