@@ -3,6 +3,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 var natural = require('natural');
+const weapon_lang = require('./src/lang/weapon_lang.json')
 
 class Client {
     constructor() {
@@ -34,9 +35,11 @@ class Client {
         }
         var weaponsUrl = `${this.endpoint}/wiki/weapons`;
         const query = options.q
+        var lang = "en"
         if(options.lang){
             const acceptedLangs = ["cs", "da", "de", "es", "fi", "fr", "hu", "it", "ja", "ko", "nl", "no", "pl", "pt", "pt-br", "ro", "ru", "sv", "tr", "zh-hans", "zh-hant"]
             if(options.lang != "en" && acceptedLangs.includes(options.lang)){
+                lang = options.lang
                 weaponsUrl += "/" + options.lang
             }
         }
@@ -80,26 +83,42 @@ class Client {
             strange_variant:{},
             update_history:{},
             bugs:{},
-            trivia:{},
+            notes:{},
+            trivia:"",
             extra_attributes:{}
-
+            
         }
         
-        //$('li[class^="toclevel"]').each((index, element) => {
-            //const content = $(element).text();
-            //if(content.includes(""))
-            //weaponInformation[content] = content;
-        //});
+        $('span[class^="mw-headline"]').each((index, element) => {
+            const content = $(element).text().toLowerCase();
+            const nextElement = $(element).parent().next();
+            // Check if the next element is <ul>, and it's not inside the <span>
+            if(content == weapon_lang.notes[lang].toLowerCase()){
+                if (nextElement.is('ul') && !nextElement.closest('span').length) {
+                    const ulContent = nextElement.text();
+                    weaponInformation.notes = ulContent;
+                }
+            }else if(content == weapon_lang.trivia[lang].toLowerCase()){
+                if (nextElement.is('ul') && !nextElement.closest('span').length) {
+                    const ulContent = nextElement.text();
+                    weaponInformation.trivia = ulContent;
+                }
+            }
+        });
+        const trivia = weaponInformation.trivia.toString().split(/\r?\n/);
+        weaponInformation.trivia = trivia;
+        const notes = weaponInformation.notes.toString().split(/\r?\n/);
+        weaponInformation.notes = notes
         const pContent = [];
         $('#content p').each((index, element) => {
-            const content = $(element).text();
+            var content = $(element).text();
+            content = content.slice(0, -1);
             pContent.push(content);
         });
         pContent.shift()
         weaponInformation.short_description = pContent[0]
         weaponInformation.description = pContent[1]
         return weaponInformation
-
     }
 }
 
