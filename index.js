@@ -84,7 +84,7 @@ class Client {
             update_history:{},
             bugs:{},
             notes:{},
-            trivia:"",
+            trivia:{},
             extra_attributes:{}
             
         }
@@ -110,11 +110,11 @@ class Client {
         weaponInformation.notes = notes
 
         if (trivia[0] === '[object Object]'){
-            weaponInformation.trivia = []
+            weaponInformation.trivia = {}
         }
 
         if (notes[0] === '[object Object]'){
-            weaponInformation.notes = []
+            weaponInformation.notes = {}
         }
 
         const pContent = [];
@@ -158,6 +158,16 @@ class Client {
             weaponInformation.item_set.items = tdContent
             if(trContent) weaponInformation.item_set.effect = trContent
         }
+
+        $('div[class^="youtubebox"] iframe').each((index, iframeElement) => {
+            const src = $(iframeElement).attr('src');
+            if(src.length > 0){
+                var link = "https:" + src
+                link = link.replace("/embed/", "/watch?v=")
+                weaponInformation.demonstration = link
+            }
+        });
+
         return weaponInformation
     }
 }

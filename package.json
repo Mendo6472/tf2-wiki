@@ -1,6 +1,6 @@
 {
   "name": "tf2-wiki",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An usefull package to get information from the official Team Fortress 2 wiki https://wiki.teamfortress.com",
   "main": "index.js",
   "repository": "https://github.com/Mendo6472/tf2-wiki",
