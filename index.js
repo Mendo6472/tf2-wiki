@@ -3,7 +3,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 var natural = require('natural');
-const weapon_lang = require('./src/lang/weapon_lang.json')
+const weapon_lang = require('./src/lang/weapon_lang.json');
 
 class Client {
     constructor() {
@@ -88,19 +88,18 @@ class Client {
             extra_attributes:{}
             
         }
-        
         $('span[class^="mw-headline"]').each((index, element) => {
             const content = $(element).text().toLowerCase();
             const nextElement = $(element).parent().next();
             // Check if the next element is <ul>, and it's not inside the <span>
             if(content == weapon_lang.notes[lang].toLowerCase()){
                 if (nextElement.is('ul') && !nextElement.closest('span').length) {
-                    const ulContent = nextElement.text();
+                    const ulContent = nextElement.text().toString();
                     weaponInformation.notes = ulContent;
                 }
             }else if(content == weapon_lang.trivia[lang].toLowerCase()){
                 if (nextElement.is('ul') && !nextElement.closest('span').length) {
-                    const ulContent = nextElement.text();
+                    const ulContent = nextElement.text().toString();
                     weaponInformation.trivia = ulContent;
                 }
             }
@@ -109,6 +108,15 @@ class Client {
         weaponInformation.trivia = trivia;
         const notes = weaponInformation.notes.toString().split(/\r?\n/);
         weaponInformation.notes = notes
+
+        if (trivia[0] === '[object Object]'){
+            weaponInformation.trivia = []
+        }
+
+        if (notes[0] === '[object Object]'){
+            weaponInformation.notes = []
+        }
+
         const pContent = [];
         $('#content p').each((index, element) => {
             var content = $(element).text();
@@ -118,6 +126,38 @@ class Client {
         pContent.shift()
         weaponInformation.short_description = pContent[0]
         weaponInformation.description = pContent[1]
+        let targetThElement = null;
+        $('th').each((index, thElement) => {
+            const anchorElement = $(thElement).find('a');
+            const href = anchorElement.attr('href');
+            if (href && href.startsWith('/wiki/Item_sets')) {
+                targetThElement = thElement;
+                return false;
+            }
+        });
+        if (targetThElement) {
+            const tdElements = [];
+            let currentElement = $(targetThElement).next();
+            
+            while (currentElement.length && currentElement.is('td')) {
+                tdElements.push(currentElement);
+                currentElement = currentElement.next();
+            }
+            
+            currentElement = $(targetThElement).parent().next('tr');
+            var trContent
+            if (currentElement.length > 0) {
+                trContent = currentElement.find('td').map((index, tdElement) => $(tdElement).text().trim()).get();
+            }
+            
+            var tdContent = tdElements.map(tdElement => $(tdElement).text().trim());
+            tdContent = tdContent[0].split("\n")
+            for(var i = 0; i < tdContent.length; i++){
+                tdContent[i] = tdContent[i].trimStart();
+            }
+            weaponInformation.item_set.items = tdContent
+            if(trContent) weaponInformation.item_set.effect = trContent
+        }
         return weaponInformation
     }
 }
